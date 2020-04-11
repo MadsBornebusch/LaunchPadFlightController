@@ -35,6 +35,7 @@
 #include "StepResponse.h"
 #include "Time.h"
 #include "UART.h"
+#include "SerialLog.h"
 
 #include "inc/hw_memmap.h"
 #include "driverlib/gpio.h"
@@ -74,6 +75,7 @@ int main(void) {
     initAltitudeHold();
 #endif
     initBluetooth();
+    initSerialLog(LOG_ANGLE);
     IntMasterEnable(); // Enable all interrupts
 
 #if UART_DEBUG
@@ -263,6 +265,8 @@ int main(void) {
                 resetHeadingHold(&angle);
 #endif
             }
+            // Log data to serial logger
+            //serialLogData(&angle);
         }
 #if 0
         static uint32_t loopTimer;
