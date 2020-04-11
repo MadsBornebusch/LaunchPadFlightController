@@ -61,8 +61,8 @@ bool dataReadyMPU6500(void) {
 // Z-axis should be facing downward
 void mpu6500BoardOrientation(sensorRaw_t *sensorRaw) {
     sensorRaw_t sensorRawTemp = *sensorRaw;
-    sensorRaw->axis.X = -sensorRawTemp.axis.Y;
-    sensorRaw->axis.Y = -sensorRawTemp.axis.X;
+    sensorRaw->axis.X = sensorRawTemp.axis.Y;
+    sensorRaw->axis.Y = sensorRawTemp.axis.X;
     sensorRaw->axis.Z = -sensorRawTemp.axis.Z;
 }
 
