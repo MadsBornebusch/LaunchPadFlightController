@@ -118,7 +118,7 @@ extern "C" {
 // startup_gcc.c
 #define UART0_HANDLER                   UARTStdioIntHandler
 #define UART1_HANDLER                   UARTStdioIntHandler1
-#define UART2_HANDLER                   IntDefaultHandler
+#define UART2_HANDLER                   UARTStdioIntHandler2
 #define UART3_HANDLER                   IntDefaultHandler
 #define UART4_HANDLER                   IntDefaultHandler
 #define UART5_HANDLER                   IntDefaultHandler

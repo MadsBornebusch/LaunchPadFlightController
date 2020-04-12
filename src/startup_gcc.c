@@ -53,6 +53,7 @@ extern int main(void);
 //*****************************************************************************
 extern void UARTStdioIntHandler(void);
 extern void UARTStdioIntHandler1(void);
+extern void UARTStdioIntHandler2(void);
 
 //*****************************************************************************
 //
