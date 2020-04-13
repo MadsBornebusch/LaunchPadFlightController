@@ -272,7 +272,7 @@ int main(void) {
 #endif
             }
             // Log data to serial logger
-            //serialLogData(&angle);
+            serialLogData(&angle);
         }
 #if 0
         static uint32_t loopTimer;

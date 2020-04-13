@@ -59,35 +59,39 @@ void initSerialLog(uint32_t mode) {
     // configured for use as a peripheral function (instead of GPIO).
     GPIOPinTypeUART(GPIO_PORTD_BASE, GPIO_PIN_6 | GPIO_PIN_7);
 
-    UARTStdioConfig2(1, 115200, SysCtlClockGet()); // Mode is set to 8N1 on UART2
+    UARTStdioConfig2(2, 115200, SysCtlClockGet()); // Mode is set to 8N1 on UART2
     UARTEchoSet2(false);
-
-#if UART_DEBUG
-    UARTprintf("UART 2 register written\r\n");
-    UARTFlushTx(false);
-#endif
 
     while (UARTBusy(UART2_BASE)) {
         // Wait until UART is ready
     }
-
-#if UART_DEBUG
-    UARTprintf("Serial log on UART 2 initialised!\r\n");
-    UARTFlushTx(false);
-#endif
-
+    
+// #if UART_DEBUG
+//     while (!UARTRxBytesAvail2()){
+//         // Wait for characters
+//     }
+//     int nbytes = UARTRxBytesAvail2();
+//     while (nbytes--)
+//         UARTprintf("UART2 %s", UARTgetc2()); // Consume all characters in the buffer
+//     UARTFlushTx(false);
+// #endif
 
     // Set log mode
     logMode = mode;
+
+    // Wait for logger to initialise
+    delay(1000);
+    UARTwrite2("Test UART2\n", 12);
+    UARTFlushTx2(false);
 
     // Write config
     writeConfig();
 
     // Write headers
-    //writeHeaders();
+    writeHeaders();
 
 #if UART_DEBUG
-    UARTprintf("Config and headers written to Serial Log!\r\n");
+    UARTprintf("Config and headers written to Serial Log!\n");
     UARTFlushTx(false);
 #endif
 
@@ -95,46 +99,46 @@ void initSerialLog(uint32_t mode) {
 
 static void writeConfig(void){
 
-    UARTprintf2("CURRENT CONFIGURATION\r\n");
-    UARTprintf2("---------------------------------\r\n");
+    UARTprintf2("CURRENT CONFIGURATION\n");
+    UARTprintf2("---------------------------------\n");
     
-    UARTprintf2("PID RollPitch Kp: %.3f\r\n", (double)cfg.pidRollPitchValues.Kp );
-    UARTprintf2("PID RollPitch Ki: %.2f\r\n", (double)cfg.pidRollPitchValues.Ki );
-    UARTprintf2("PID RollPitch Kd: %.5f\r\n", (double)cfg.pidRollPitchValues.Kd );
-    UARTprintf2("PID RollPitch I-limit: %.2f\r\n", (double)cfg.pidRollPitchValues.integrationLimit );
-    UARTprintf2("PID RollPitch Fc: %.1f\r\n", (double)cfg.pidRollPitchValues.Fc );
+    UARTprintf2("PID RollPitch Kp: %.3f\n", (double)cfg.pidRollPitchValues.Kp );
+    UARTprintf2("PID RollPitch Ki: %.2f\n", (double)cfg.pidRollPitchValues.Ki );
+    UARTprintf2("PID RollPitch Kd: %.5f\n", (double)cfg.pidRollPitchValues.Kd );
+    UARTprintf2("PID RollPitch I-limit: %.2f\n", (double)cfg.pidRollPitchValues.integrationLimit );
+    UARTprintf2("PID RollPitch Fc: %.1f\n", (double)cfg.pidRollPitchValues.Fc );
 
-    UARTprintf2("PID Yaw Kp: %.3f\r\n", (double)cfg.pidYawValues.Kp );
-    UARTprintf2("PID Yaw Ki: %.2f\r\n", (double)cfg.pidYawValues.Ki );
-    UARTprintf2("PID Yaw Kd: %.5f\r\n", (double)cfg.pidYawValues.Kd );
-    UARTprintf2("PID Yaw I-limit: %.2f\r\n", (double)cfg.pidYawValues.integrationLimit );
-    UARTprintf2("PID Yaw Fc: %.1f\r\n", (double)cfg.pidYawValues.Fc );
+    UARTprintf2("PID Yaw Kp: %.3f\n", (double)cfg.pidYawValues.Kp );
+    UARTprintf2("PID Yaw Ki: %.2f\n", (double)cfg.pidYawValues.Ki );
+    UARTprintf2("PID Yaw Kd: %.5f\n", (double)cfg.pidYawValues.Kd );
+    UARTprintf2("PID Yaw I-limit: %.2f\n", (double)cfg.pidYawValues.integrationLimit );
+    UARTprintf2("PID Yaw Fc: %.1f\n", (double)cfg.pidYawValues.Fc );
 
-    UARTprintf2("PID Sonar alt hold Kp: %.3f\r\n", (double)cfg.pidSonarAltHoldValues.Kp );
-    UARTprintf2("PID Sonar alt hold Ki: %.2f\r\n", (double)cfg.pidSonarAltHoldValues.Ki );
-    UARTprintf2("PID Sonar alt hold Kd: %.5f\r\n", (double)cfg.pidSonarAltHoldValues.Kd );
-    UARTprintf2("PID Sonar alt hold I-limit: %.2f\r\n", (double)cfg.pidSonarAltHoldValues.integrationLimit );
-    UARTprintf2("PID Sonar alt hold Fc: %.1f\r\n", (double)cfg.pidSonarAltHoldValues.Fc );
+    UARTprintf2("PID Sonar alt hold Kp: %.3f\n", (double)cfg.pidSonarAltHoldValues.Kp );
+    UARTprintf2("PID Sonar alt hold Ki: %.2f\n", (double)cfg.pidSonarAltHoldValues.Ki );
+    UARTprintf2("PID Sonar alt hold Kd: %.5f\n", (double)cfg.pidSonarAltHoldValues.Kd );
+    UARTprintf2("PID Sonar alt hold I-limit: %.2f\n", (double)cfg.pidSonarAltHoldValues.integrationLimit );
+    UARTprintf2("PID Sonar alt hold Fc: %.1f\n", (double)cfg.pidSonarAltHoldValues.Fc );
 
-    UARTprintf2("PID Baro alt hold Kp: %.3f\r\n", (double)cfg.pidBaroAltHoldValues.Kp );
-    UARTprintf2("PID Baro alt hold Ki: %.2f\r\n", (double)cfg.pidBaroAltHoldValues.Ki );
-    UARTprintf2("PID Baro alt hold Kd: %.5f\r\n", (double)cfg.pidBaroAltHoldValues.Kd );
-    UARTprintf2("PID Baro alt hold I-limit: %.2f\r\n", (double)cfg.pidBaroAltHoldValues.integrationLimit );
-    UARTprintf2("PID Baro alt hold Fc: %.1f\r\n", (double)cfg.pidBaroAltHoldValues.Fc );
+    UARTprintf2("PID Baro alt hold Kp: %.3f\n", (double)cfg.pidBaroAltHoldValues.Kp );
+    UARTprintf2("PID Baro alt hold Ki: %.2f\n", (double)cfg.pidBaroAltHoldValues.Ki );
+    UARTprintf2("PID Baro alt hold Kd: %.5f\n", (double)cfg.pidBaroAltHoldValues.Kd );
+    UARTprintf2("PID Baro alt hold I-limit: %.2f\n", (double)cfg.pidBaroAltHoldValues.integrationLimit );
+    UARTprintf2("PID Baro alt hold Fc: %.1f\n", (double)cfg.pidBaroAltHoldValues.Fc );
 
-    UARTprintf2("Angle Kp: %.2f\r\n", (double)cfg.angleKp );
-    UARTprintf2("Heading Kp: %.2f\r\n", (double)cfg.headKp );
-    UARTprintf2("Max Angle Inclination: %.1f\r\n", (double)cfg.maxAngleInclination ); // Max angle in self level mode
-    UARTprintf2("Max Angle Inclination Dist Sensor: %.1f\r\n", (double)cfg.maxAngleInclinationDistSensor ); // Max angle when using sonar or LIDAR-Lite v3 in altitude hold mode
-    UARTprintf2("Stick scaling RollPitch: %.2f\r\n", (double)cfg.stickScalingRollPitch );
-    UARTprintf2("Stick scaling Yaw: %.1f\r\n", (double)cfg.stickScalingYaw );
+    UARTprintf2("Angle Kp: %.2f\n", (double)cfg.angleKp );
+    UARTprintf2("Heading Kp: %.2f\n", (double)cfg.headKp );
+    UARTprintf2("Max Angle Inclination: %.1f\n", (double)cfg.maxAngleInclination ); // Max angle in self level mode
+    UARTprintf2("Max Angle Inclination Dist Sensor: %.1f\n", (double)cfg.maxAngleInclinationDistSensor ); // Max angle when using sonar or LIDAR-Lite v3 in altitude hold mode
+    UARTprintf2("Stick scaling RollPitch: %.2f\n", (double)cfg.stickScalingRollPitch );
+    UARTprintf2("Stick scaling Yaw: %.1f\n", (double)cfg.stickScalingYaw );
 
-    UARTprintf2("Stick scaling Yaw: %.1f\r\n", (double)cfg.stickScalingYaw );
+    UARTprintf2("Stick scaling Yaw: %.1f\n", (double)cfg.stickScalingYaw );
 
-    UARTprintf2("Acc calibration: %d, %d, %d\r\n", (int16_t)cfg.accZero.data[0],(int16_t)cfg.accZero.data[1],(int16_t)cfg.accZero.data[2]);
-    UARTprintf2("Mag calibration: %d, %d, %d\r\n", (int16_t)cfg.magZero.data[0],(int16_t)cfg.magZero.data[1],(int16_t)cfg.magZero.data[2]);
+    UARTprintf2("Acc calibration: %d, %d, %d\n", (int16_t)cfg.accZero.data[0],(int16_t)cfg.accZero.data[1],(int16_t)cfg.accZero.data[2]);
+    UARTprintf2("Mag calibration: %d, %d, %d\n", (int16_t)cfg.magZero.data[0],(int16_t)cfg.magZero.data[1],(int16_t)cfg.magZero.data[2]);
 
-    UARTprintf2("---------------------------------\r\n");
+    UARTprintf2("---------------------------------\n");
     UARTFlushTx2(false); // Flush TX buffer
 }
 
@@ -144,7 +148,7 @@ static void writeHeaders(void){
         UARTprintf2("roll,pitch,yaw");
 
     // Done writing header
-    UARTprintf2("\r\n"); // Print carriage return and line feed
+    UARTprintf2("\n"); // Print carriage return and line feed
     UARTFlushTx2(false); // Flush TX buffer
 }
 
@@ -156,7 +160,6 @@ void serialLogData(angle_t *angle){
         UARTprintf2("%d,%d,%d",(int16_t)angle->axis.roll, (int16_t)angle->axis.pitch, (int16_t)angle->axis.yaw);
 
     // Done writing data
-    UARTprintf2("\r\n"); // Print carriage return and line feed
+    UARTprintf2("\n"); // Print carriage return and line feed
     UARTFlushTx2(false); // Flush TX buffer
-
 }

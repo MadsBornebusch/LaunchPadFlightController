@@ -378,7 +378,7 @@ UARTStdioConfig2(uint32_t ui32PortNum, uint32_t ui32Baud, uint32_t ui32SrcClock)
     // Set the UART to interrupt whenever the TX FIFO is almost empty or
     // when any character is received.
     //
-    MAP_UARTFIFOLevelSet(g_ui32Base, UART_FIFO_TX2_8, UART_FIFO_RX2_8);
+    MAP_UARTFIFOLevelSet(g_ui32Base, UART_FIFO_TX1_8, UART_FIFO_RX1_8);
 
     //
     // Flush both the buffers.
