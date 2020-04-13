@@ -20,6 +20,7 @@
 
 #include "HMC5883L.h"
 #include "MPU6500.h"
+#include "AltitudeHold.h"
 #include "Types.h"
 
 #ifdef __cplusplus
@@ -32,7 +33,7 @@ enum {
     LOG_GYRO = (1 << 1),
     LOG_MAG = (1 << 2),
     LOG_BARO = (1 << 3),
-    LOG_UL = (1 << 4),
+    LOG_SONAR = (1 << 4),
     LOG_LIDAR = (1 << 5),
     LOG_MODE = (1 << 6),
     LOG_ANGLE = (1 << 7),
@@ -41,7 +42,7 @@ enum {
 };
 
 void initSerialLog(uint32_t mode);
-void serialLogData(angle_t *angle);
+void serialLogData(float dt, angle_t *angle, altitude_t *altitude);
 
 #ifdef __cplusplus
 }

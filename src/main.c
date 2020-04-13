@@ -81,7 +81,7 @@ int main(void) {
     initADNS3080();
 #endif
     initBluetooth();
-    initSerialLog(LOG_ANGLE);
+    initSerialLog(LOG_ANGLE || LOG_BARO || LOG_SONAR);
     IntMasterEnable(); // Enable all interrupts
 
 #if UART_DEBUG
@@ -272,7 +272,7 @@ int main(void) {
 #endif
             }
             // Log data to serial logger
-            serialLogData(&angle);
+            serialLogData(dt, &angle, &altitude);
         }
 #if 0
         static uint32_t loopTimer;
