@@ -37,3 +37,5 @@ lib/readme.txt
 .idea/
 .pio/
 .vscode/
+logs/flight_logs/
+logs/plots/
