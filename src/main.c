@@ -21,7 +21,9 @@
 
 #include "AltitudeHold.h"
 #include "ADNS3080.h"
+#include "BMP180.h"
 #include "Bluetooth.h"
+#include "BMP180.h"
 #include "Buzzer.h"
 #include "Config.h"
 #include "EEPROM.h"
@@ -33,11 +35,11 @@
 #include "PPM.h"
 #include "PID.h"
 #include "RX.h"
+#include "SerialLog.h"
 #include "SPI.h"
 #include "StepResponse.h"
 #include "Time.h"
 #include "UART.h"
-#include "SerialLog.h"
 
 #include "inc/hw_memmap.h"
 #include "driverlib/gpio.h"
@@ -81,7 +83,7 @@ int main(void) {
     initADNS3080();
 #endif
     initBluetooth();
-    initSerialLog(LOG_ANGLE || LOG_BARO || LOG_SONAR);
+    initSerialLog(LOG_ANGLE || LOG_GYRO || LOG_ACC || LOG_MAG || LOG_BARO || LOG_SONAR);
     IntMasterEnable(); // Enable all interrupts
 
 #if UART_DEBUG
@@ -165,7 +167,12 @@ int main(void) {
 
 #if USE_SONAR || USE_BARO || USE_LIDAR_LITE
             static altitude_t altitude;
+#if USE_BARO
+            static bmp180_t baro;
+            getAltitude(&angle, &mpu6500, &altitude, &baro, now, dt);
+#else
             getAltitude(&angle, &mpu6500, &altitude, now, dt);
+#endif
 #endif
 
             /*UARTprintf("%d\t%d\t%d\n", (int16_t)angle.axis.roll, (int16_t)angle.axis.pitch, (int16_t)angle.axis.yaw);
@@ -272,7 +279,9 @@ int main(void) {
 #endif
             }
             // Log data to serial logger
-            serialLogData(dt, &angle, &altitude);
+#if USE_MAG && USE_SONAR && USE_BARO
+            serialLogData(dt, &angle, &mpu6500, &mag, &altitude, &baro);
+#endif
         }
 #if 0
         static uint32_t loopTimer;

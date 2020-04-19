@@ -39,10 +39,11 @@ enum {
     LOG_ANGLE = (1 << 7),
     LOG_HEIGHT = (1 << 8),
     LOG_PID = (1 << 9),
+    LOG_RX = (1 << 10),
 };
 
 void initSerialLog(uint32_t mode);
-void serialLogData(float dt, angle_t *angle, altitude_t *altitude);
+void serialLogData(float dt, angle_t *angle, mpu6500_t *mpu6500, sensor_t *mag, altitude_t *altitude, bmp180_t *baro);
 
 #ifdef __cplusplus
 }

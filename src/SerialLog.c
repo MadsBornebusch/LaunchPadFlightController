@@ -19,12 +19,13 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "SerialLog.h"
+#include "AltitudeHold.h"
+#include "BMP180.h"
 #include "Buzzer.h"
 #include "EEPROM.h"
 #include "Magnetometer.h"
 #include "MPU6500.h"
-#include "AltitudeHold.h"
+#include "SerialLog.h"
 #include "Time.h"
 #include "UART.h"
 #include "uartstdio2.h" // Add "UART_BUFFERED2" to preprocessor - it uses a modified version of uartstdio, so it can be used with another UART interface
@@ -150,12 +151,22 @@ static void writeHeaders(void){
     if (logMode && LOG_ANGLE)
         UARTwrite2("roll,pitch,yaw,", 15); // Degrees
 
+    if(logMode && LOG_ACC)
+        UARTwrite2("accX,accY,accZ,",15);
+
+    if(logMode && LOG_GYRO)
+        UARTwrite2("gyroX,gyroY,gyroZ,",18);
+    
+     if(logMode && LOG_MAG)
+        UARTwrite2("magX,magY,magZ,",15);
+
 #if USE_BARO
     if(logMode && LOG_BARO)
-        UARTwrite2("alt,zvel,zacc,altLPF,",21); // Millimeters
+        UARTwrite2("pressure,temperature,absoluteAltitude,groundAltitude,",53);
+        //UARTwrite2("alt,zvel,zacc,altLPF,",21); // Millimeters
 #endif
 
-#if USE_SONAR
+#if USE_SONAR //TODO: check if the sonar headers are printed to the log
     if(logMode && LOG_SONAR)
         UARTwrite("sonarDist,",10); // Millimeters
 #endif
@@ -174,7 +185,7 @@ static void writeHeaders(void){
     delay(200);
 }
 
-void serialLogData(float dt, angle_t *angle, altitude_t *altitude){
+void serialLogData(float dt, angle_t *angle,  mpu6500_t *mpu6500, sensor_t *mag, altitude_t *altitude, bmp180_t *baro){
     // TODO: Use UARTwrite2 to make it faster!
 
     // Write angles
@@ -184,13 +195,35 @@ void serialLogData(float dt, angle_t *angle, altitude_t *altitude){
                             (int16_t)angle->axis.pitch, (uint16_t)(abs(angle->axis.pitch*100.0f) % 100),
                             (int16_t)angle->axis.yaw, (uint16_t)(abs(angle->axis.yaw*100.0f) % 100) );
 
+    if(logMode && LOG_ACC)
+        UARTprintf2("%d,%d,%d,",                            
+                            mpu6500->acc.axis.X,
+                            mpu6500->acc.axis.Y,
+                            mpu6500->acc.axis.Z );
+
+    if(logMode && LOG_GYRO)
+        UARTprintf2("%d.%03u,%d.%03u,%d.%03u,",
+                            (int16_t)mpu6500->gyroRate.axis.roll, (uint16_t)(abs(mpu6500->gyroRate.axis.roll*1000.0f) % 1000),
+                            (int16_t)mpu6500->gyroRate.axis.pitch, (uint16_t)(abs(mpu6500->gyroRate.axis.pitch*1000.0f) % 1000),
+                            (int16_t)mpu6500->gyroRate.axis.yaw, (uint16_t)(abs(mpu6500->gyroRate.axis.yaw*1000.0f) % 1000) );
+    
+     if(logMode && LOG_MAG)
+        UARTprintf2("%d,%d,%d,",                            
+                            mag->axis.X,
+                            mag->axis.Y,
+                            mag->axis.Z );
+
 #if USE_BARO
     if(logMode && LOG_BARO)
         UARTprintf2("%d,%d,%d,%d,",
-                            (int16_t)(altitude->altitude*10.0f),
-                            (int16_t)(altitude->velocity*10.0f),
-                            (int16_t)(altitude->acceleration*10.0f),
-                            (int16_t)(altitude->altitudeLpf*10.0f));
+                            (int16_t)(baro->pressure),// Pressure in Pa
+                            (int16_t)(baro->temperature), // Temperature in 0.1 C
+                            (int16_t)(baro->absoluteAltitude), // Absolute altitude in cm
+                            (int16_t)(baro->groundAltitude)); // Ground altitude in cm
+                            //(int16_t)(altitude->altitude*10.0f),
+                            //(int16_t)(altitude->velocity*10.0f),
+                            //(int16_t)(altitude->acceleration*10.0f),
+                            //(int16_t)(altitude->altitudeLpf*10.0f));
 #endif
 
 #if USE_SONAR
@@ -202,24 +235,6 @@ void serialLogData(float dt, angle_t *angle, altitude_t *altitude){
     if(logMode && (LOG_SONAR || LOG_LIDAR))
         UARTprintf2("%d,",(int16_t)altitude->distance);
 #endif
-
-/*
-typedef struct {
-#if USE_BARO
-    float altitude, velocity, acceleration; // Values are in cm
-    float altitudeLpf; // Low-pass filtered altitude estimate
-#endif
-#if USE_SONAR
-    int16_t sonarDistance; // Distance in mm
-#endif
-#if USE_LIDAR_LITE
-    int32_t lidarLiteDistance; // Distance in mm
-#endif
-#if USE_SONAR || USE_LIDAR_LITE
-    float distance; // Fusioned distance from sonar and LIDAR-Lite v3 in mm
-#endif
-} altitude_t;
-*/
 
     if(logMode != LOG_NONE)
         UARTprintf2("%u", (uint16_t)(dt*1e3f)); // Milliseconds
