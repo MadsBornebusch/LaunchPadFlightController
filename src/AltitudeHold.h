@@ -18,7 +18,9 @@
 #if !defined(__altitude_h__) && (USE_SONAR || USE_BARO || USE_LIDAR_LITE)
 #define __altitude_h__
 
+#include "BMP180.h"
 #include "MPU6500.h"
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,7 +43,11 @@ typedef struct {
 } altitude_t;
 
 void initAltitudeHold(void);
+#if USE_BARO
+void getAltitude(angle_t *angle, mpu6500_t *mpu6500, altitude_t *altitude, bmp180_t *baro, uint32_t now, float dt);
+#else
 void getAltitude(angle_t *angle, mpu6500_t *mpu6500, altitude_t *altitude, uint32_t now, float dt);
+#endif
 float updateAltitudeHold(float aux, altitude_t *altitude, float throttle, uint32_t now, float dt);
 void resetAltitudeHold(altitude_t *altitude);
 

@@ -79,7 +79,11 @@ void initAltitudeHold(void) {
 // TODO: LPF mpu6500->accBodyFrame.axis.Z
 // TODO: Maybe the altitude should only be run when new barometer values have been read and then just use a moving average on the acceleration data
 // TODO: Reset acceleration estimate when unarmed, as we can assumed that it is at rest, same goes for BMP180 ground altitude
+#if USE_BARO
+void getAltitude(angle_t *angle, mpu6500_t __attribute__((unused)) *mpu6500, altitude_t *altitude, bmp180_t *baro, uint32_t __attribute__((unused)) now, float __attribute__((unused)) dt) {
+#else
 void getAltitude(angle_t *angle, mpu6500_t __attribute__((unused)) *mpu6500, altitude_t *altitude, uint32_t __attribute__((unused)) now, float __attribute__((unused)) dt) {
+#endif
 #if USE_SONAR
     if (triggerSonar()) { // Trigger sonar
 #if USE_BARO
@@ -140,7 +144,8 @@ void getAltitude(angle_t *angle, mpu6500_t __attribute__((unused)) *mpu6500, alt
         UARTFlushTx1(false);
 #endif
     }
-
+    // Set barometer values to pass to main
+    baro = &bmp180;
     /* Estimate altitude and velocity using barometer */
     // Low-pass filter altitude estimate - see: https://en.wikipedia.org/wiki/Exponential_smoothing
     static low_pass_t baro_low_pass = { .Fc = 8.38f }; // Cutoff frequency in Hz - TODO: Set in Android app
@@ -180,7 +185,7 @@ void getAltitude(angle_t *angle, mpu6500_t __attribute__((unused)) *mpu6500, alt
 
     float accDt = altitude->acceleration * dt; // Limit number of multiplications
     float accVelocity = altitude->velocity + accDt; // Estimate velocity using acceleration
-    float accAltitude = altitude->altitude + altitude->velocity * dt + 0.5f * accDt * dt; // Estimate altitude using acceleration
+    float accAltitude = altitude->altitude + altitude->velocity * dt + 0.5f * accDt * dt; // Estimate altitude using acceleration (TODO: should this be accDt^2 ???)
 
     /* Estimate altitude and velocity using complimentary filter on barometer and acceleration estimates */
     static const float velocity_cf = 0.985f; // TODO: Set in Android app
